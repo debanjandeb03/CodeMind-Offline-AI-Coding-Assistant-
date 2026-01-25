@@ -1,0 +1,1 @@
+# CodeMind-Offline-AI-Coding-Assistant-
