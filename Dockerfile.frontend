@@ -1,0 +1,20 @@
+#BaseImage
+FROM python:3.11-slim
+
+#WorkDir
+WORKDIR /app
+
+#Copy
+COPY requirements.txt .
+
+#Install Dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+#Copy Project
+COPY . .
+
+#Expose
+EXPOSE 8501
+
+#Run
+CMD [ "streamlit","run","app.py","--server.address=0.0.0.0" ]

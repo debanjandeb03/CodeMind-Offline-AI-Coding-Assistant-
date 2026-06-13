@@ -3,7 +3,6 @@
 import streamlit as st
 import requests
 import re
-from prompt import SYSTEM_PROMPT
 
 
 # ------------------ Utility Function ------------------
@@ -16,19 +15,18 @@ def clean_output(text):
 
 
 # ------------------ LLM Function ------------------
-def query_llm(full_prompt):
+def query_backend(user_query):
     try:
         response = requests.post(
-            "http://host.docker.internal:11434/api/generate",
-            json={
-                "model": "deepseek-coder",
-                "prompt": full_prompt,
-                "stream": False
-            },
+         "http://backend:8000/chat",
+         json={
+             "prompt":user_query
+         }
         )
-        return response.json().get("response", "No response")
+        data = response.json()
+        return data["response"]
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error : {str(e)}"
 
 
 # ------------------ UI ------------------
@@ -123,12 +121,10 @@ if st.button("Ask CodeMind"):
     if user_input.strip() == "":
         st.warning("Please enter a coding-related query.")
     else:
-        full_prompt = SYSTEM_PROMPT + "\n\nUSER QUERY:\n" + user_input
-
         st.subheader("🧠 DeepSeek Response")
 
         with st.spinner("Thinking..."):
-            output = query_llm(full_prompt)
+            output = query_backend(user_input)
 
         cleaned_output = clean_output(output)
         st.markdown(cleaned_output, unsafe_allow_html=True)
