@@ -1,168 +1,303 @@
 ```
 # CodeMind – Offline AI Coding Assistant
 
-CodeMind is a privacy-first, offline AI coding assistant built using Ollama and DeepSeek-R1, designed specifically for programming, DSA, and debugging workflows.
+## Overview
 
-Unlike typical AI tools, CodeMind runs entirely on our local machine, ensuring:
-- Zero data leakage.
-- No API costs.
-- Full control over inference.
+CodeMind is a privacy-first AI coding assistant designed for programming, DSA, debugging, and technical interview preparation.
+
+Unlike traditional cloud-based AI tools, CodeMind runs entirely on local infrastructure using Ollama and DeepSeek-Coder, ensuring complete data privacy, zero API costs, and full control over inference.
+
+The project has evolved from a simple Streamlit application into a production-style AI system featuring a FastAPI backend, service-oriented architecture, Docker containerization, and Docker Compose orchestration.
+
+---
+
+## What's New in the Latest Version
+
+### FastAPI Backend Integration
+
+* Introduced a dedicated FastAPI backend layer.
+* Clean REST API endpoints for AI interactions.
+* Separation between frontend and backend responsibilities.
+
+### Layered Architecture
+
+Implemented a scalable architecture with:
+
+* API Routes Layer
+* Service Layer
+* Provider Layer
+* Schema Layer
+* Configuration Layer
+
+This improves maintainability, testability, and extensibility.
+
+### Pydantic Schema Validation
+
+Added request and response validation using Pydantic schemas to ensure reliable API communication.
+
+### Health Monitoring Endpoints
+
+Added production-ready endpoints:
+
+```http
+GET /health
+GET /model-info
+```
+
+Used for monitoring, debugging, deployment verification, and cloud readiness.
+
+### Docker Multi-Container Setup
+
+Migrated from a single Docker container to:
+
+* Frontend Container (Streamlit)
+* Backend Container (FastAPI)
+
+Managed through Docker Compose.
+
+### Configuration Management
+
+Introduced environment-based configuration using:
+
+```env
+MODEL_NAME
+MODEL_VERSION
+OLLAMA_URL
+SERVICE_NAME
+```
 
 ---
 
 ## Key Features
 
-- Fully offline & privacy-focused
-- Strictly supports coding-related queries.
-- Powered by DeepSeek-R1 (7B) for strong reasoning.
-- Structured output:
-  - Approach
-  - Code
-  - Explanation
-  - Complexity Analysis
-- Local inference via Ollama.
-- Clean and minimal Streamlit UI.
-- Dockerized for portability and reproducibility.
+* Fully Offline AI Assistant
+* Privacy-Focused Architecture
+* Coding-Only AI Responses
+* DeepSeek-Coder Integration
+* FastAPI Backend
+* Streamlit Frontend
+* Dockerized Deployment
+* Docker Compose Support
+* Health Monitoring APIs
+* Model Metadata APIs
+* Structured Response Format
 
 ---
 
 ## Architecture
 
+```text
 User (Browser)
-↓
-Streamlit Interface
-↓
-Prompt Engineering Layer
-↓
+        │
+        ▼
+Streamlit Frontend
+        │
+        ▼
+FastAPI Backend
+        │
+        ▼
+Service Layer
+        │
+        ▼
+Provider Layer
+        │
+        ▼
 Ollama Runtime
-↓
-DeepSeek-R1 (Local LLM)
-
----
-
-## Model Details
-
-- Model: DeepSeek-R1 (7B)
-- Inference: Fully local via Ollama
-- Execution Mode: Offline (no internet required after setup)
-
->NOTE: Model weights are not included in this repository and must be downloaded locally using Ollama.
+        │
+        ▼
+DeepSeek-Coder
+```
 
 ---
 
 ## Project Structure
 
-CodeMind/
+```text
+CodeMind-Offline-AI-Coding-Assistant
 │
-├── app.py # Streamlit application
-├── prompt.py # System prompt (coding-only constraint)
-├── requirements.txt # Dependencies
-├── Dockerfile # Containerization setup
-├── README.md
-└── .gitignore
+├── api/
+│   └── routes/
+│       └── chat.py
+│
+├── core/
+│   └── config.py
+│
+├── prompts/
+│   └── prompt.py
+│
+├── providers/
+│   └── ollama_provider.py
+│
+├── schemas/
+│   └── chat_schema.py
+│
+├── services/
+│   └── llm_service.py
+│
+├── app.py
+├── main.py
+│
+├── Dockerfile.backend
+├── Dockerfile.frontend
+├── docker-compose.yml
+│
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
 ---
 
-## Setup & Usage
+## API Endpoints
 
-1️⃣ Install Ollama
-Download from: https://ollama.com/download
-Verify installation:
+### Chat Endpoint
+
+```http
+POST /chat
+```
+
+Request:
+
+```json
+{
+  "prompt": "Write Binary Search in Python"
+}
+```
+
+Response:
+
+```json
+{
+  "response": "Generated AI response"
+}
+```
+
+---
+
+### Health Check
+
+```http
+GET /health
+```
+
+Response:
+
+```json
+{
+  "status": "healthy"
+}
+```
+
+---
+
+### Model Information
+
+```http
+GET /model-info
+```
+
+Response:
+
+```json
+{
+  "model_name": "DeepSeek-Coder",
+  "model_version": "1.0.0",
+  "provider": "ollama",
+  "status": "loaded"
+}
+```
+
+---
+
+## Setup
+
+### Install Ollama
+
 ```bash
 ollama --version
+```
 
-2️⃣ Pull Model
-ollama run deepseek-r1
+### Download Model
 
-3️⃣ Install Dependencies
+```bash
+ollama run deepseek-coder
+```
+
+### Install Dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-4️⃣ Run Application
+### Run Backend
+
+```bash
+uvicorn main:app --reload
+```
+
+### Run Frontend
+
+```bash
 streamlit run app.py
+```
 
-🐳 Run with Docker (Recommended)
-docker build -t codemind .
-docker run -p 8501:8501 codemind
+---
 
-Open in browser:
+## Docker Deployment
+
+### Build and Run
+
+```bash
+docker compose up --build
+```
+
+### Access Application
+
+Frontend:
+
+```text
 http://localhost:8501
+```
 
----
+Backend Swagger Docs:
 
-## Supported Use Cases
-
-- Explain and optimize DSA problems.
-- Debug code (logical + runtime errors).
-- Analyze time & space complexity.
-- Improve algorithm design.
-- Practice offline coding interviews.
-
-❌ Non-technical queries are intentionally restricted.
-
----
-
-## Design Decisions
-
-🔹 Local Inference over Cloud APIs
-Ensures:
-- Data privacy.
-- Zero dependency on external services.
-- No recurring costs.
-
-🔹 Coding-Only Prompt Constraint
-- Improves response quality.
-- Prevents misuse.
-- Keeps system focused on technical tasks.
-
-🔹 Streamlit UI
-- Fast prototyping.
-- Minimal frontend overhead.
-- Easy local deployment.
-
-🔹 Dockerization
-- Environment consistency.
-- Easy portability across systems.
-- Simplified setup for recruiters and users.
-
----
-
-## Limitations & Trade-offs
-
-- Requires moderate hardware (recommended: 16 GB RAM).
-- Performance depends on CPU/GPU availability.
-- Higher latency compared to cloud APIs.
-- No persistent memory (intentional for privacy).
-
----
-
-## Performance Insights
-
-- Avg latency: 2–10 seconds (hardware dependent).
-- Handles large code inputs reliably.
-- Optimized for offline usage, not real-time cloud speed.
+```text
+http://localhost:8000/docs
+```
 
 ---
 
 ## Tech Stack
 
-- Python
-- Streamlit
-- Ollama
-- DeepSeek-R1 LLM
-- Docker
+* Python
+* FastAPI
+* Streamlit
+* Ollama
+* DeepSeek-Coder
+* Docker
+* Docker Compose
+* Pydantic
 
 ---
 
 ## Future Improvements
 
-- Streaming responses (real-time token output).
-- Chat history support.
-- Hybrid mode (local + cloud fallback).
-- Model selection (fast vs accurate).
+* Streaming Token Responses
+* Conversation History
+* User Authentication
+* Multiple Model Support
+* Cloud Deployment on AWS EC2
+* CI/CD Pipeline
+* Monitoring & Logging
 
 ---
 
-📌 Author
+## Author
 
-Debanjan Deb
-B.Tech (ECS), KIIT University
+**Debanjan Deb**
+
+B.Tech (Electronics and Computer Science Engineering)
+
+KIIT University
+
 ```
